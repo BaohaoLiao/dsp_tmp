@@ -113,6 +113,7 @@ def setup(args):
         pipeline_parallel_size=args.pipeline_parallel_size,
         trust_remote_code=True,
         num_speculative_tokens=5,
+        max_num_seqs=64,
     )
     tokenizer = None
     if args.apply_chat_template:
