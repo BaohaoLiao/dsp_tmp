@@ -163,7 +163,7 @@ import torch
 def generate_completions(models, tokenizers, prompts, batch_size=1, stop_id_sequences=None, add_special_tokens=True, disable_tqdm=False, **generation_kwargs):
     generations = []
     if not disable_tqdm:
-        progress = tqdm.tqdm(total=len(prompts), desc="Generating Completions")
+        progress = tqdm(total=len(prompts), desc="Generating Completions")
 
     num_return_sequences = generation_kwargs.get("num_return_sequences", 1)
     for i in range(0, len(prompts), batch_size):
