@@ -265,6 +265,7 @@ def main(llm, tokenizer, data_name, args):
                 ),
             )
         outputs = sorted(outputs, key=lambda x: int(x.request_id))
+        print(outputs[0])
         outputs = [output.outputs[0].text for output in outputs]
         assert len(outputs) == len(current_prompts)
 
