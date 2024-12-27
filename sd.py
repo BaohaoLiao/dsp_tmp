@@ -105,6 +105,7 @@ def prepare_data(data_name, args):
 
 def setup(args):
     # load model
+    """
     available_gpus = os.environ["CUDA_VISIBLE_DEVICES"].split(",")
     llm = LLM(
         model=args.model_name_or_path,
@@ -120,12 +121,21 @@ def setup(args):
         tokenizer = AutoTokenizer.from_pretrained(
             args.model_name_or_path, trust_remote_code=True
         )
+    """
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+    llm1_tokenizer = AutoTokenizer.from_pretrained(args.draft_model_name_or_path)
+    llm2_tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
+    llm1 = AutoModelForCausalLM.from_pretrained(args.draft_model_name_or_path, device_map="auto")
+    llm2 = AutoModelForCausalLM.from_pretrained(args.model_name_or_path, device_map="auto")
+
+    llms = [llm1, llm2]
+    tokenizers = [llm1_tokenizer, llm2_tokenizer]
 
     # infer & eval
     data_list = args.data_names.split(",")
     results = []
     for data_name in data_list:
-        results.append(main(llm, tokenizer, data_name, args))
+        results.append(main(llms, tokenizers, data_name, args))
 
     # add "avg" result to data_list and results
     data_list.append("avg")
@@ -148,7 +158,57 @@ def is_multi_choice(answer):
     return True
 
 
-def main(llm, tokenizer, data_name, args):
+import torch
+@torch.no_grad()
+def generate_completions(models, tokenizers, prompts, batch_size=1, stop_id_sequences=None, add_special_tokens=True, disable_tqdm=False, **generation_kwargs):
+    generations = []
+    if not disable_tqdm:
+        progress = tqdm.tqdm(total=len(prompts), desc="Generating Completions")
+
+    num_return_sequences = generation_kwargs.get("num_return_sequences", 1)
+    for i in range(0, len(prompts), batch_size):
+        batch_prompts = prompts[i:i+batch_size]
+
+        tokenized_prompts = tokenizers[1](batch_prompts, padding="longest", return_tensors="pt", add_special_tokens=add_special_tokens)
+        batch_input_ids = tokenized_prompts.input_ids
+        attention_mask = tokenized_prompts.attention_mask
+
+        if models[1].device.type == "cuda":
+            batch_input_ids = batch_input_ids.cuda()
+            attention_mask = attention_mask.cuda()
+
+        batch_outputs = models[1].generate(
+            input_ids=batch_input_ids,
+            attention_mask=attention_mask,
+            assistant_model=models[0], 
+            tokenizer=tokenizers[1],
+            assistant_tokenizer=tokenizers[0,]
+            **generation_kwargs
+        )
+
+        batch_outputs = tokenizers[1].batch_decode(batch_outputs, skip_special_tokens=True)
+        batch_prompts = tokenizers[1].batch_decode(batch_input_ids, skip_special_tokens=True)
+        # duplicate the prompts to match the number of return sequences
+        batch_prompts = [prompt for prompt in batch_prompts for _ in range(num_return_sequences)]
+        batch_generations = [
+            output[len(prompt):] for prompt, output in zip(batch_prompts, batch_outputs)
+        ]
+
+        # remove the remain stop sequence from the output.
+        for idx, prediction in enumerate(batch_generations):
+            for stop_sequence in stop_id_sequences:
+                batch_generations[idx] = prediction.split(stop_sequence)[0]
+
+        generations += batch_generations
+
+        if not disable_tqdm:
+            progress.update(len(batch_prompts)//num_return_sequences)
+
+    assert len(generations) == len(prompts) * num_return_sequences, "number of generations should be equal to number of prompts * num_return_sequences"
+    return generations
+
+
+def main(llms, tokenizers, data_name, args):
     examples, processed_samples, out_file = prepare_data(data_name, args)
     print("=" * 50)
     print("data:", data_name, " ,remain samples:", len(examples))
@@ -211,7 +271,7 @@ def main(llm, tokenizer, data_name, args):
     ]
     if args.apply_chat_template:
         input_prompts = [
-            tokenizer.apply_chat_template(
+            tokenizers[0].apply_chat_template(
                 [{"role": "user", "content": prompt.strip()}],
                 tokenize=False,
                 add_generation_prompt=True,
@@ -249,24 +309,13 @@ def main(llm, tokenizer, data_name, args):
 
         # get all outputs
         prompts = [item[1] for item in current_prompts]
-        outputs = llm.generate(
-                prompts,
-                SamplingParams(
-                    temperature=args.temperature,
-                    top_p=args.top_p,
-                    max_tokens=args.max_tokens_per_call,
-                    n=1,
-                    stop=stop_words,
-                    stop_token_ids=(
-                        [151645, 151643]
-                        if "qwen2" in args.model_name_or_path.lower()
-                        else None
-                    ),
-                ),
+        outputs = generate_completions(
+                models=llms,
+                tokenizers=tokenizers,
+                prompts=prompts,
+                max_new_tokens=args.max_tokens_per_call,
+                batch_size=16,
             )
-        outputs = sorted(outputs, key=lambda x: int(x.request_id))
-        print(outputs[0])
-        outputs = [output.outputs[0].text for output in outputs]
         assert len(outputs) == len(current_prompts)
 
         # process all outputs
