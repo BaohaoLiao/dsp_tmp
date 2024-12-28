@@ -49,6 +49,7 @@ def parse_args():
         action="store_true",
         help="Few shot for multiple-choice questions, zero shot for others.",
     )
+    parser.add_argument("--batch_size", default=1, type=int)
     args = parser.parse_args()
     args.top_p = (
         1 if args.temperature == 0 else args.top_p
@@ -324,7 +325,7 @@ def main(llms, tokenizers, data_name, args):
                 tokenizers=tokenizers,
                 prompts=prompts,
                 max_new_tokens=args.max_tokens_per_call,
-                batch_size=1,
+                batch_size=args.batch_size,
             )
         assert len(outputs) == len(current_prompts)
 
