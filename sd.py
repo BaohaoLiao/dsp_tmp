@@ -130,13 +130,13 @@ def setup(args):
         args.draft_model_name_or_path, 
         device_map="auto", 
         attn_implementation="flash_attention_2",
-        torch_dtype=torch.bfloat16,
+        torch_dtype="auto",
     )
     llm2 = AutoModelForCausalLM.from_pretrained(
         args.model_name_or_path, 
         device_map="auto", 
         attn_implementation="flash_attention_2",
-        torch_dtype=torch.bfloat16,
+        torch_dtype="auto",
     )
 
     llms = [llm1, llm2]
