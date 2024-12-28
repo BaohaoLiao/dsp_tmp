@@ -314,7 +314,7 @@ def main(llms, tokenizers, data_name, args):
                 tokenizers=tokenizers,
                 prompts=prompts,
                 max_new_tokens=args.max_tokens_per_call,
-                batch_size=16,
+                batch_size=1,
             )
         assert len(outputs) == len(current_prompts)
 
