@@ -195,9 +195,9 @@ def generate_completions(models, tokenizers, prompts, batch_size=1, stop_id_sequ
         ]
 
         # remove the remain stop sequence from the output.
-        for idx, prediction in enumerate(batch_generations):
-            for stop_sequence in stop_id_sequences:
-                batch_generations[idx] = prediction.split(stop_sequence)[0]
+        # for idx, prediction in enumerate(batch_generations):
+        #    for stop_sequence in stop_id_sequences:
+        #        batch_generations[idx] = prediction.split(stop_sequence)[0]
 
         generations += batch_generations
 
