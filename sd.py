@@ -182,7 +182,7 @@ def generate_completions(models, tokenizers, prompts, batch_size=1, stop_id_sequ
             attention_mask=attention_mask,
             assistant_model=models[0], 
             tokenizer=tokenizers[1],
-            assistant_tokenizer=tokenizers[0]
+            assistant_tokenizer=tokenizers[0],
             **generation_kwargs
         )
 
