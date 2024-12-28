@@ -125,8 +125,18 @@ def setup(args):
     from transformers import AutoModelForCausalLM, AutoTokenizer
     llm1_tokenizer = AutoTokenizer.from_pretrained(args.draft_model_name_or_path)
     llm2_tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
-    llm1 = AutoModelForCausalLM.from_pretrained(args.draft_model_name_or_path, device_map="auto", attn_implementation="flash_attention_2")
-    llm2 = AutoModelForCausalLM.from_pretrained(args.model_name_or_path, device_map="auto", attn_implementation="flash_attention_2")
+    llm1 = AutoModelForCausalLM.from_pretrained(
+        args.draft_model_name_or_path, 
+        device_map="auto", 
+        attn_implementation="flash_attention_2",
+        dtype="bfloat16",
+    )
+    llm2 = AutoModelForCausalLM.from_pretrained(
+        args.model_name_or_path, 
+        device_map="auto", 
+        attn_implementation="flash_attention_2",
+        dtype="bfloat16",
+    )
 
     llms = [llm1, llm2]
     tokenizers = [llm1_tokenizer, llm2_tokenizer]
