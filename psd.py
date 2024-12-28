@@ -514,6 +514,9 @@ def main(client1, client2, prm, tokenizer1, tokenizer2, tokenizer_prm, data_name
     result_json["tokens_ratio_discarded(correct,wrong)"] = (
         llm1_discarded_tokens[0]/total_tokens_for_correct_pred, llm1_discarded_tokens[1]/total_tokens_for_wrong_pred
     ) if (total_tokens_for_correct_pred > 0 and total_tokens_for_wrong_pred > 0)  else (0,0) 
+    result_json["acceptance_rate"] = (
+        1 - (llm1_discarded_tokens[0] + llm1_discarded_tokens[1])/(llm1_tokens[0] + llm1_tokens[1])
+    ) if ((llm1_tokens[0] + llm1_tokens[1]) > 0)  else (0,0) 
 
     with open(
         out_file.replace(".jsonl", f"_{args.prompt_type}_metrics.json"), "w"
