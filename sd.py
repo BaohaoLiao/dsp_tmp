@@ -5,8 +5,8 @@ import time
 from datetime import datetime
 from tqdm import tqdm
 
-from transformers import AutoTokenizer
-from vllm import LLM, SamplingParams
+#from transformers import AutoTokenizer
+#from vllm import LLM, SamplingParams
 
 from external.qwen25_math_evaluation.evaluate import evaluate
 from external.qwen25_math_evaluation.utils import set_seed, load_jsonl, save_jsonl, construct_prompt
@@ -122,7 +122,8 @@ def setup(args):
             args.model_name_or_path, trust_remote_code=True
         )
     """
-    from transformers import AutoModelForCausalLM, AutoTokenizer
+    #from transformers import AutoModelForCausalLM, AutoTokenizer
+    from external.transformers.src.transformers import AutoModelForCausalLM, AutoTokenizer
     llm1_tokenizer = AutoTokenizer.from_pretrained(args.draft_model_name_or_path)
     llm2_tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
     llm1 = AutoModelForCausalLM.from_pretrained(args.draft_model_name_or_path, device_map="auto", attn_implementation="flash_attention_2")
