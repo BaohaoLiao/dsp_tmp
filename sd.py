@@ -342,7 +342,6 @@ def main(llm, tokenizer, data_name, args):
             )  # sort outputs by request_id
             outputs = [output.outputs[0].text for output in outputs]
 
-            import time
             time.sleep(50)
             print("after 50s later \n")
         else:
