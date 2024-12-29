@@ -118,6 +118,7 @@ def setup(args):
             trust_remote_code=True,
             num_speculative_tokens=5,
             max_num_seqs=args.max_num_seqs,
+            disable_log_stats=False,
         )
         tokenizer = None
         if args.apply_chat_template:
