@@ -341,6 +341,10 @@ def main(llm, tokenizer, data_name, args):
                 outputs, key=lambda x: int(x.request_id)
             )  # sort outputs by request_id
             outputs = [output.outputs[0].text for output in outputs]
+
+            import time
+            time.sleep(50)
+            print("after 50s later \n")
         else:
             outputs = generate_completions(
                     models=llm,
