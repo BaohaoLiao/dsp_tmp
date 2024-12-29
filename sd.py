@@ -5,7 +5,7 @@ import time
 from datetime import datetime
 from tqdm import tqdm
 
-#from vllm import LLM, SamplingParams
+from vllm import LLM, SamplingParams
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from external.qwen25_math_evaluation.evaluate import evaluate
@@ -34,6 +34,7 @@ def parse_args():
     parser.add_argument("--top_p", default=0.95, type=float)
     parser.add_argument("--max_tokens_per_call", default=2048, type=int)
     parser.add_argument("--shuffle", action="store_true")
+    parser.add_argument("--use_vllm", action="store_true")
     parser.add_argument("--save_outputs", action="store_true")
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--use_safetensors", action="store_true")
@@ -49,7 +50,8 @@ def parse_args():
         action="store_true",
         help="Few shot for multiple-choice questions, zero shot for others.",
     )
-    parser.add_argument("--batch_size", default=1, type=int)
+    parser.add_argument("--batch_size", default=1, type=int) 
+    parser.add_argument("--max_num_seqs", default=64, type=int)
     args = parser.parse_args()
     args.top_p = (
         1 if args.temperature == 0 else args.top_p
@@ -106,46 +108,45 @@ def prepare_data(data_name, args):
 
 def setup(args):
     # load model
-    """
     available_gpus = os.environ["CUDA_VISIBLE_DEVICES"].split(",")
-    llm = LLM(
-        model=args.model_name_or_path,
-        speculative_model=args.draft_model_name_or_path,
-        tensor_parallel_size=len(available_gpus) // args.pipeline_parallel_size,
-        pipeline_parallel_size=args.pipeline_parallel_size,
-        trust_remote_code=True,
-        num_speculative_tokens=5,
-        max_num_seqs=64,
-    )
-    tokenizer = None
-    if args.apply_chat_template:
-        tokenizer = AutoTokenizer.from_pretrained(
-            args.model_name_or_path, trust_remote_code=True
+    if args.use_vllm:
+        llm = LLM(
+            model=args.model_name_or_path,
+            speculative_model=args.draft_model_name_or_path,
+            tensor_parallel_size=len(available_gpus) // args.pipeline_parallel_size,
+            pipeline_parallel_size=args.pipeline_parallel_size,
+            trust_remote_code=True,
+            num_speculative_tokens=5,
+            max_num_seqs=args.max_num_seqs,
         )
-    """
-    llm1_tokenizer = AutoTokenizer.from_pretrained(args.draft_model_name_or_path)
-    llm2_tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
-    llm1 = AutoModelForCausalLM.from_pretrained(
-        args.draft_model_name_or_path, 
-        device_map="auto", 
-        attn_implementation="flash_attention_2",
-        torch_dtype="auto",
-    )
-    llm2 = AutoModelForCausalLM.from_pretrained(
-        args.model_name_or_path, 
-        device_map="auto", 
-        attn_implementation="flash_attention_2",
-        torch_dtype="auto",
-    )
-
-    llms = [llm1, llm2]
-    tokenizers = [llm1_tokenizer, llm2_tokenizer]
+        tokenizer = None
+        if args.apply_chat_template:
+            tokenizer = AutoTokenizer.from_pretrained(
+                args.model_name_or_path, trust_remote_code=True
+            )
+    else:
+        llm1_tokenizer = AutoTokenizer.from_pretrained(args.draft_model_name_or_path)
+        llm2_tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
+        llm1 = AutoModelForCausalLM.from_pretrained(
+            args.draft_model_name_or_path, 
+            device_map="auto", 
+            attn_implementation="flash_attention_2",
+            torch_dtype="auto",
+        )
+        llm2 = AutoModelForCausalLM.from_pretrained(
+            args.model_name_or_path, 
+            device_map="auto", 
+            attn_implementation="flash_attention_2",
+            torch_dtype="auto",
+        )
+        llm = [llm1, llm2]
+        tokenizer = [llm1_tokenizer, llm2_tokenizer]
 
     # infer & eval
     data_list = args.data_names.split(",")
     results = []
     for data_name in data_list:
-        results.append(main(llms, tokenizers, data_name, args))
+        results.append(main(llm, tokenizer, data_name, args))
 
     # add "avg" result to data_list and results
     data_list.append("avg")
@@ -218,7 +219,7 @@ def generate_completions(models, tokenizers, prompts, batch_size=1, stop_id_sequ
     return generations
 
 
-def main(llms, tokenizers, data_name, args):
+def main(llm, tokenizer, data_name, args):
     examples, processed_samples, out_file = prepare_data(data_name, args)
     print("=" * 50)
     print("data:", data_name, " ,remain samples:", len(examples))
@@ -281,7 +282,7 @@ def main(llms, tokenizers, data_name, args):
     ]
     if args.apply_chat_template:
         input_prompts = [
-            tokenizers[0].apply_chat_template(
+            tokenizer[0].apply_chat_template(
                 [{"role": "user", "content": prompt.strip()}],
                 tokenize=False,
                 add_generation_prompt=True,
@@ -319,13 +320,36 @@ def main(llms, tokenizers, data_name, args):
 
         # get all outputs
         prompts = [item[1] for item in current_prompts]
-        outputs = generate_completions(
-                models=llms,
-                tokenizers=tokenizers,
-                prompts=prompts,
-                max_new_tokens=args.max_tokens_per_call,
-                batch_size=args.batch_size,
+        if args.use_vllm:
+            outputs = llm.generate(
+                prompts,
+                SamplingParams(
+                    temperature=args.temperature,
+                    top_p=args.top_p,
+                    max_tokens=args.max_tokens_per_call,
+                    n=1,
+                    stop=stop_words,
+                    stop_token_ids=(
+                        [151645, 151643]
+                        if "qwen2" in args.model_name_or_path.lower()
+                        else None
+                    ),
+                ),
             )
+
+            outputs = sorted(
+                outputs, key=lambda x: int(x.request_id)
+            )  # sort outputs by request_id
+            outputs = [output.outputs[0].text for output in outputs]
+        else:
+            outputs = generate_completions(
+                    models=llm,
+                    tokenizers=tokenizer,
+                    prompts=prompts,
+                    max_new_tokens=args.max_tokens_per_call,
+                    batch_size=args.batch_size,
+                )
+            
         assert len(outputs) == len(current_prompts)
 
         # process all outputs
