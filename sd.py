@@ -340,7 +340,7 @@ def main(llm, tokenizer, data_name, args):
                 outputs, key=lambda x: int(x.request_id)
             )  # sort outputs by request_id
             outputs = [output.outputs[0].text for output in outputs]
-            print(llm.llm_engine.stat_logger)
+            print(llm.llm_engine.stat_loggers)
         else:
             outputs = generate_completions(
                     models=llm,
