@@ -335,6 +335,7 @@ def main(llm, tokenizer, data_name, args):
                         if "qwen2" in args.model_name_or_path.lower()
                         else None
                     ),
+                    seed=args.seed,
                 ),
             )
             outputs = sorted(
