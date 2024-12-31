@@ -114,6 +114,7 @@ def setup(args):
             model=args.model_name_or_path,
             speculative_model=args.draft_model_name_or_path,
             tensor_parallel_size=len(available_gpus) // args.pipeline_parallel_size,
+            speculative_draft_tensor_parallel_size=1,
             pipeline_parallel_size=args.pipeline_parallel_size,
             trust_remote_code=True,
             num_speculative_tokens=5,
