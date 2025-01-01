@@ -167,7 +167,7 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
     turn_info = [[] for _ in prompts]  # List to store (turn_num, client_id) for each prompt
     current_prompts = [(i, p, []) for i, p in enumerate(prompts)] # (index, prompt, responses)
     num_turn = 0
-    prompts_len = [tokenizer1.encode(p) for _, p, _ in current_prompts]
+    prompts_len = [len(tokenizer1.encode(p)) for _, p, _ in current_prompts]
    
     while current_prompts:
         prm_threshold = args.max_prm_threshold - (args.max_prm_threshold - args.min_prm_threshold) * num_turn / args.max_turns
