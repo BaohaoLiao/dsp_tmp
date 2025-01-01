@@ -176,40 +176,38 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
 
         #current_max_token_count = max([prompt_len + token_count[0] + token_count[1] for prompt_len, token_count in zip(prompts_len, token_counts)])
 
-        try:
-            responses1 = client1.completions.create(
-                model=args.llm1_name_or_path.split("/")[-1],
-                prompt=batch_prompts,
-                temperature=args.temperature,
-                top_p=args.top_p,
-                max_tokens=args.max_tokens_per_call, # - current_max_token_count,
-                n=1,
-                stop=[args.step_word],
-            ).choices
-            responses1 = sorted(responses1, key=lambda x: int(x.index))
-        except:
-            print("error happens in response1")
-            import sys
-            sys.exit()
+        responses1 = client1.completions.create(
+            model=args.llm1_name_or_path.split("/")[-1],
+            prompt=batch_prompts,
+            temperature=args.temperature,
+            top_p=args.top_p,
+            max_tokens=args.max_tokens_per_call, # - current_max_token_count,
+            n=1,
+            stop=[args.step_word],
+        ).choices
+        responses1 = sorted(responses1, key=lambda x: int(x.index))
+        #except:
+        #    print("error happens in response1")
+        #    import sys
+        #    sys.exit()
 
         # Evaluate responses from client1 with PRM
-        try: 
-            full_responses = [''.join(r[0] for r in prev_resp) + new_resp.text 
-                        for (_, _, prev_resp), new_resp in zip(current_prompts, responses1)]
-            processed_data = [
-                prepare_input(p, full_resp, tokenizer=tokenizer_prm, step_token=args.step_word) 
-                for (_, p, _), full_resp in zip(current_prompts, full_responses)
-            ]
-            input_ids, steps, reward_flags = zip(*processed_data)
-            rewards = prm.embeddings.create(
-                input=input_ids,
-                model=args.prm_name_or_path.split("/")[-1],
-            )
-            step_rewards = derive_step_rewards_vllm(rewards, reward_flags) # list[list]
-        except:
-            print("error happens in PRM")
-            import sys
-            sys.exit()
+        full_responses = [''.join(r[0] for r in prev_resp) + new_resp.text 
+                    for (_, _, prev_resp), new_resp in zip(current_prompts, responses1)]
+        processed_data = [
+            prepare_input(p, full_resp, tokenizer=tokenizer_prm, step_token=args.step_word) 
+            for (_, p, _), full_resp in zip(current_prompts, full_responses)
+        ]
+        input_ids, steps, reward_flags = zip(*processed_data)
+        rewards = prm.embeddings.create(
+            input=input_ids,
+            model=args.prm_name_or_path.split("/")[-1],
+        )
+        step_rewards = derive_step_rewards_vllm(rewards, reward_flags) # list[list]
+        #except:
+        #    print("error happens in PRM")
+        #    import sys
+        #    sys.exit()
 
         # Split prompts based on step_reward
         good_prompts = []
@@ -225,21 +223,20 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
         # Generate responses using client2 for bad prompts
         if bad_prompts:
             batch_prompts = [p + ''.join(r[0] for r in responses) for _, p, responses in bad_prompts]
-            try:
-                responses2 = client2.completions.create(
-                    model=args.llm2_name_or_path.split("/")[-1],
-                    prompt=batch_prompts,
-                    temperature=args.temperature,
-                    top_p=args.top_p,
-                    max_tokens=args.max_tokens_per_call, # - current_max_token_count,
-                    n=1,
-                    stop=[args.step_word],
-                ).choices
-                responses2 = sorted(responses2, key=lambda x: int(x.index))
-            except:
-                print("error happens in PRM")
-                import sys
-                sys.exit()
+            responses2 = client2.completions.create(
+                model=args.llm2_name_or_path.split("/")[-1],
+                prompt=batch_prompts,
+                temperature=args.temperature,
+                top_p=args.top_p,
+                max_tokens=args.max_tokens_per_call, # - current_max_token_count,
+                n=1,
+                stop=[args.step_word],
+            ).choices
+            responses2 = sorted(responses2, key=lambda x: int(x.index))
+            #except:
+            #    print("error happens in PRM")
+            #    import sys
+            #    sys.exit()
             
             # Add client2 responses to good_prompts
             for (orig_idx, prompt, prev_responses), response2 in zip(bad_prompts, responses2):
