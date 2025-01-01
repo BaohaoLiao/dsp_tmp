@@ -139,8 +139,6 @@ def setup(args):
         base_url=args.prm_ip_address,
     )
     prm_tokenizer = AutoTokenizer.from_pretrained(args.prm_name_or_path, trust_remote_code=True)
-    models = prm.models.list()
-    print("#########", models.data[0].id)
 
     # infer & eval
     data_list = args.data_names.split(",")
@@ -218,7 +216,7 @@ def get_responses(args, prm, draft_tokenizer, target_tokenizer, prm_tokenizer, p
         input_ids, steps, reward_flags = zip(*processed_data)
         rewards = prm.embeddings.create(
             input=input_ids,
-            model=args.prm_name_or_path.split("/")[-1],
+            model=prm.models.list().data[0].id,
         )
         step_rewards = derive_step_rewards_vllm(rewards, reward_flags) # list[list]
 
