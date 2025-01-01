@@ -51,7 +51,8 @@ def parse_args():
         help="Few shot for multiple-choice questions, zero shot for others.",
     )
     parser.add_argument("--batch_size", default=1, type=int) 
-    parser.add_argument("--max_num_seqs", default=64, type=int)
+    parser.add_argument("--max_num_seqs", default=64, type=int) 
+    parser.add_argument("--speculative_draft_tensor_parallel_size", default=1, type=int)
     args = parser.parse_args()
     args.top_p = (
         1 if args.temperature == 0 else args.top_p
@@ -114,7 +115,7 @@ def setup(args):
             model=args.model_name_or_path,
             speculative_model=args.draft_model_name_or_path,
             tensor_parallel_size=len(available_gpus) // args.pipeline_parallel_size,
-            speculative_draft_tensor_parallel_size=1,
+            speculative_draft_tensor_parallel_size=args.speculative_draft_tensor_parallel_size,
             pipeline_parallel_size=args.pipeline_parallel_size,
             trust_remote_code=True,
             num_speculative_tokens=5,
