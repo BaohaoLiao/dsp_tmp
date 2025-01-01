@@ -172,14 +172,14 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
         prm_threshold = args.max_prm_threshold - (args.max_prm_threshold - args.min_prm_threshold) * num_turn / args.max_turns
         batch_prompts = [p + ''.join(r[0] for r in responses) for _, p, responses in current_prompts]
 
-        current_max_token_count = max([token_count[0] + token_count[1] for token_count in token_counts])
+        #current_max_token_count = max([token_count[0] + token_count[1] for token_count in token_counts])
 
         responses1 = client1.completions.create(
             model=args.llm1_name_or_path.split("/")[-1],
             prompt=batch_prompts,
             temperature=args.temperature,
             top_p=args.top_p,
-            max_tokens=args.max_tokens_per_call - current_max_token_count,
+            max_tokens=args.max_tokens_per_call, # - current_max_token_count,
             n=1,
             stop=[args.step_word],
         ).choices
@@ -218,7 +218,7 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
                 prompt=batch_prompts,
                 temperature=args.temperature,
                 top_p=args.top_p,
-                max_tokens=args.max_tokens_per_call - current_max_token_count,
+                max_tokens=args.max_tokens_per_call, # - current_max_token_count,
                 n=1,
                 stop=[args.step_word],
             ).choices
@@ -515,7 +515,7 @@ def main(client1, client2, prm, tokenizer1, tokenizer2, tokenizer_prm, data_name
         llm1_discarded_tokens[0]/total_tokens_for_correct_pred, llm1_discarded_tokens[1]/total_tokens_for_wrong_pred
     ) if (total_tokens_for_correct_pred > 0 and total_tokens_for_wrong_pred > 0)  else (0,0) 
     result_json["acceptance_rate"] = (
-        1 - (llm1_discarded_tokens[0] + llm1_discarded_tokens[1])/(llm1_tokens[0] + llm1_tokens[1])
+        (llm1_tokens[0] + llm1_tokens[1])/(llm1_tokens[0] + llm1_tokens[1] + llm1_discarded_tokens[0] + llm1_discarded_tokens[1])
     ) if ((llm1_tokens[0] + llm1_tokens[1]) > 0)  else (0,0) 
 
     with open(
