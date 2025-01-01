@@ -167,19 +167,20 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
     turn_info = [[] for _ in prompts]  # List to store (turn_num, client_id) for each prompt
     current_prompts = [(i, p, []) for i, p in enumerate(prompts)] # (index, prompt, responses)
     num_turn = 0
+    prompts_len = [tokenizer1.encode(p) for _, p, _ in current_prompts]
    
     while current_prompts:
         prm_threshold = args.max_prm_threshold - (args.max_prm_threshold - args.min_prm_threshold) * num_turn / args.max_turns
         batch_prompts = [p + ''.join(r[0] for r in responses) for _, p, responses in current_prompts]
 
-        #current_max_token_count = max([token_count[0] + token_count[1] for token_count in token_counts])
+        current_max_token_count = max([prompt_len + token_count[0] + token_count[1] for prompt_len, token_count in zip(prompts_len, token_counts)])
 
         responses1 = client1.completions.create(
             model=args.llm1_name_or_path.split("/")[-1],
             prompt=batch_prompts,
             temperature=args.temperature,
             top_p=args.top_p,
-            max_tokens=args.max_tokens_per_call, # - current_max_token_count,
+            max_tokens=args.max_tokens_per_call - current_max_token_count,
             n=1,
             stop=[args.step_word],
         ).choices
@@ -218,7 +219,7 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
                 prompt=batch_prompts,
                 temperature=args.temperature,
                 top_p=args.top_p,
-                max_tokens=args.max_tokens_per_call, # - current_max_token_count,
+                max_tokens=args.max_tokens_per_call - current_max_token_count,
                 n=1,
                 stop=[args.step_word],
             ).choices
