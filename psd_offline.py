@@ -199,6 +199,13 @@ def get_responses(args, prm, draft_tokenizer, target_tokenizer, prm_tokenizer, p
             )
         #draft_responses = [out.outputs[0] for out in draft_outputs]
 
+        # delete previous llm engine
+        destroy_model_parallel()
+        del draft_llm.llm_engine.model_executor.driver_worker
+        del draft_llm 
+        gc.collect()
+        torch.cuda.empty_cache()
+
         # Evaluate responses from client1 with PRM
         full_responses = [''.join(r[0] for r in prev_resp) + draft_output.outputs[0].text 
                     for (_, _, prev_resp), draft_output in zip(current_prompts, draft_outputs)]
@@ -226,12 +233,6 @@ def get_responses(args, prm, draft_tokenizer, target_tokenizer, prm_tokenizer, p
 
         # Generate responses using client2 for bad prompts
         if bad_prompts:
-            # delete previous llm engine
-            destroy_model_parallel()
-            del draft_llm.llm_engine.model_executor.driver_worker
-            del draft_llm 
-            gc.collect()
-            torch.cuda.empty_cache()
             
             batch_prompts = [p + ''.join(r[0] for r in responses) for _, p, responses in bad_prompts]
             target_llm = LLM(
