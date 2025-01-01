@@ -139,6 +139,8 @@ def setup(args):
         base_url=args.prm_ip_address,
     )
     prm_tokenizer = AutoTokenizer.from_pretrained(args.prm_name_or_path, trust_remote_code=True)
+    models = prm.models.list()
+    print("#########", models.data[0].id)
 
     # infer & eval
     data_list = args.data_names.split(",")
