@@ -289,7 +289,8 @@ def get_responses(args, prm, draft_tokenizer, target_tokenizer, prm_tokenizer, p
             # terminate conditions
             if (out.outputs[0].stop_reason is None) \
              or len(out.prompt_token_ids) + len(out.outputs[0].token_ids) >= args.max_tokens_per_call - 20 \
-             or num_turn >= args.max_turns - 1:
+             or num_turn >= args.max_turns - 1 \
+             or (out.outputs[0].token_ids[-1] in [151645, 151643]):
                 outputs[orig_idx] = full_responses_text[:-len(args.step_word)]
             else:
                 next_prompts.append((orig_idx, prompt, full_responses))
