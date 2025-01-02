@@ -60,6 +60,7 @@ def parse_args():
         action="store_true",
         help="Few shot for multiple-choice questions, zero shot for others.",
     )
+    parser.add_argument("--patience", type=int, default=5)
     args = parser.parse_args()
     args.top_p = (
         1 if args.temperature == 0 else args.top_p
@@ -175,6 +176,8 @@ def get_responses(args, prm, draft_tokenizer, target_tokenizer, prm_tokenizer, p
     num_turn = 0
     draft_llm = None
     stop_words = ["</s>", "<|im_end|>", "<|endoftext|>", args.step_word]
+    pre_num_finished = 0
+    num_unchanged = 0
    
     while current_prompts:
         prm_threshold = args.max_prm_threshold - (args.max_prm_threshold - args.min_prm_threshold) * num_turn / args.max_turns
@@ -295,14 +298,24 @@ def get_responses(args, prm, draft_tokenizer, target_tokenizer, prm_tokenizer, p
             if (out.outputs[0].stop_reason is None) \
              or len(out.prompt_token_ids) + len(out.outputs[0].token_ids) >= args.max_tokens_per_call - 20 \
              or num_turn >= args.max_turns - 1 \
-             or (out.outputs[0].token_ids[-1] in [151645, 151643]):
+             or (out.outputs[0].token_ids[-1] in [151645, 151643]) \
+             or num_unchanged >= args.patience - 1:
                 outputs[orig_idx] = full_responses_text[:-len(args.step_word)]
             else:
                 next_prompts.append((orig_idx, prompt, full_responses))
                 
+        if len(outputs) - len(current_prompts) > pre_num_finished:
+            num_unchanged = 0
+            pre_num_finished = len(outputs) - len(current_prompts)
+        else:
+            num_unchanged += 1
+ 
         current_prompts = next_prompts
-        print(f"Turn {num_turn}: Complete {len(outputs) - len(current_prompts)} / {len(outputs)}")
+        print(f"#### Step {num_turn}: Complete {len(outputs) - len(current_prompts)} / {len(outputs)}")
         num_turn += 1
+
+
+
     return outputs, token_counts, turn_info
 
 
