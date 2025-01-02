@@ -205,7 +205,7 @@ def get_responses(args, prm, draft_tokenizer, target_tokenizer, prm_tokenizer, p
                 use_tqdm=False,
             )
         #draft_responses = [out.outputs[0] for out in draft_outputs]
-        print("??????", max([len(draft_output.outputs[0].token_ids) + len(draft_output.prompt_token_ids) for draft_output in draft_outputs]))
+        print("Max length of generation from Draft", max([len(draft_output.outputs[0].token_ids) + len(draft_output.prompt_token_ids) for draft_output in draft_outputs]))
 
         # Evaluate responses from client1 with PRM
         full_responses = [''.join(r[0] for r in prev_resp) + draft_output.outputs[0].text 
@@ -215,8 +215,7 @@ def get_responses(args, prm, draft_tokenizer, target_tokenizer, prm_tokenizer, p
             for (_, p, _), full_resp in zip(current_prompts, full_responses)
         ]
         input_ids, steps, reward_flags = zip(*processed_data)
-
-        print("max length input ids", max([len(input_id) for input_id in input_ids]))
+        print("Max length of inputs for PRM", max([len(input_id) for input_id in input_ids]))
 
         rewards = prm.embeddings.create(
             input=input_ids,
