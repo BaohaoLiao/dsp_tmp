@@ -173,19 +173,21 @@ def get_responses(args, prm, draft_tokenizer, target_tokenizer, prm_tokenizer, p
     turn_info = [[] for _ in prompts]  # List to store (turn_num, client_id) for each prompt
     current_prompts = [(i, p, []) for i, p in enumerate(prompts)] # (index, prompt, responses)
     num_turn = 0
+    draft_llm = None
    
     while current_prompts:
         prm_threshold = args.max_prm_threshold - (args.max_prm_threshold - args.min_prm_threshold) * num_turn / args.max_turns
         batch_prompts = [p + ''.join(r[0] for r in responses) for _, p, responses in current_prompts]
 
-        draft_llm = LLM(
-            model=args.draft_name_or_path,
-            tensor_parallel_size=1,
-            pipeline_parallel_size=1,
-            trust_remote_code=True,
-            gpu_memory_utilization=0.9,
-            device="cuda:0"
-        )
+        if draft_llm is None:
+            draft_llm = LLM(
+                model=args.draft_name_or_path,
+                tensor_parallel_size=1,
+                pipeline_parallel_size=1,
+                trust_remote_code=True,
+                gpu_memory_utilization=0.9,
+                device="cuda:0"
+            )
         draft_outputs = draft_llm.generate(
                 batch_prompts,
                 SamplingParams(
@@ -198,13 +200,6 @@ def get_responses(args, prm, draft_tokenizer, target_tokenizer, prm_tokenizer, p
                 use_tqdm=False,
             )
         #draft_responses = [out.outputs[0] for out in draft_outputs]
-
-        # delete previous llm engine
-        destroy_model_parallel()
-        del draft_llm.llm_engine.model_executor.driver_worker
-        del draft_llm 
-        gc.collect()
-        torch.cuda.empty_cache()
 
         # Evaluate responses from client1 with PRM
         full_responses = [''.join(r[0] for r in prev_resp) + draft_output.outputs[0].text 
@@ -233,6 +228,13 @@ def get_responses(args, prm, draft_tokenizer, target_tokenizer, prm_tokenizer, p
 
         # Generate responses using client2 for bad prompts
         if bad_prompts:
+            # delete previous llm engine
+            destroy_model_parallel()
+            del draft_llm.llm_engine.model_executor.driver_worker
+            del draft_llm 
+            gc.collect()
+            torch.cuda.empty_cache()
+            draft_llm = None
             
             batch_prompts = [p + ''.join(r[0] for r in responses) for _, p, responses in bad_prompts]
             target_llm = LLM(
