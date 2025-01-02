@@ -215,6 +215,9 @@ def get_responses(args, prm, draft_tokenizer, target_tokenizer, prm_tokenizer, p
             for (_, p, _), full_resp in zip(current_prompts, full_responses)
         ]
         input_ids, steps, reward_flags = zip(*processed_data)
+
+        print("max length input ids", max([len(input_id) for input_id in input_ids]))
+
         rewards = prm.embeddings.create(
             input=input_ids,
             model=prm.models.list().data[0].id,
