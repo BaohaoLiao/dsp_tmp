@@ -210,9 +210,9 @@ def get_responses(args, draft_client, target_client, prm_client, draft_tokenizer
                 used_response = draft_response
                 used_draft = True
                 token_counts[orig_idx] = (
-                    token_counts[orig_idx][0]+ len(draft_tokenizer.encode(draft_response_text),  # accepted draft tokens
+                    token_counts[orig_idx][0]+ len(draft_tokenizer.encode(draft_response_text)),  # accepted draft tokens
                     token_counts[orig_idx][1], 
-                    token_counts[orig_idx][2])
+                    token_counts[orig_idx][2]
                 )
             else:
                 token_counts[orig_idx] = (
