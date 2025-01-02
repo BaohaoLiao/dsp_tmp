@@ -190,7 +190,8 @@ def get_responses(args, prm, draft_tokenizer, target_tokenizer, prm_tokenizer, p
                 pipeline_parallel_size=1,
                 trust_remote_code=True,
                 gpu_memory_utilization=0.9,
-                device="cuda:0"
+                device="cuda:0",
+                max_model_len=4096,
             )
         draft_outputs = draft_llm.generate(
                 batch_prompts,
@@ -250,7 +251,8 @@ def get_responses(args, prm, draft_tokenizer, target_tokenizer, prm_tokenizer, p
                 pipeline_parallel_size=1,
                 trust_remote_code=True,
                 gpu_memory_utilization=0.9,
-                device="cuda:0"
+                device="cuda:0",
+                max_model_len=4096,
             )
             target_outputs = target_llm.generate(
                 batch_prompts,
