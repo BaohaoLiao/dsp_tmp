@@ -193,10 +193,10 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
         #    sys.exit()
 
         # Evaluate responses from client1 with PRM
-        full_responses = [(''.join(r[0] for r in prev_resp) + new_resp.text).replace("\n\n", "\n")
+        full_responses = [''.join(r[0] for r in prev_resp) + new_resp.text
                     for (_, _, prev_resp), new_resp in zip(current_prompts, responses1)]
         processed_data = [
-            prepare_input(p, full_resp, tokenizer=tokenizer_prm, step_token="\n") 
+            prepare_input(p, full_resp, tokenizer=tokenizer_prm, step_token=args.step_word) 
             for p, full_resp in zip(current_problems, full_responses)
         ]
         input_ids, steps, reward_flags = zip(*processed_data)
