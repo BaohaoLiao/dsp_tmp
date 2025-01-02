@@ -222,8 +222,7 @@ def get_responses(args, prm, draft_tokenizer, target_tokenizer, prm_tokenizer, p
             if step_reward[-1] >= prm_threshold:
                 good_prompts.append((orig_idx, prompt, prev_responses, draft_output, True))  # True means use client1
             else:
-                draft_response_text = draft_output.outputs[0].text + args.step_word
-                token_counts[orig_idx] = (token_counts[orig_idx][0], token_counts[orig_idx][1], token_counts[orig_idx][2]+len(tokenizer.encode(draft_response_text)))
+                token_counts[orig_idx] = (token_counts[orig_idx][0], token_counts[orig_idx][1], token_counts[orig_idx][2]+len(draft_output.outputs[0].token_ids))
                 bad_prompts.append((orig_idx, prompt, prev_responses))
 
         # Generate responses using client2 for bad prompts
