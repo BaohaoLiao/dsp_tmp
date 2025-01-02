@@ -303,14 +303,14 @@ def get_responses(args, prm, draft_tokenizer, target_tokenizer, prm_tokenizer, p
                 outputs[orig_idx] = full_responses_text[:-len(args.step_word)]
             else:
                 next_prompts.append((orig_idx, prompt, full_responses))
-                
+
+        current_prompts = next_prompts      
         if len(outputs) - len(current_prompts) > pre_num_finished:
             num_unchanged = 0
             pre_num_finished = len(outputs) - len(current_prompts)
         else:
             num_unchanged += 1
  
-        current_prompts = next_prompts
         print(f"#### Step {num_turn}: Complete {len(outputs) - len(current_prompts)} / {len(outputs)}")
         num_turn += 1
 
