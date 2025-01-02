@@ -376,7 +376,7 @@ def main(draft_client, target_client, prm_client, draft_tokenizer, target_tokeni
         # get all outputs
         prompts = [item[1] for item in current_prompts]
         problems = [sample["question"] for sample in samples]
-        assert len(prompts) == len(questions)
+        assert len(prompts) == len(problems)
         outputs, token_counts, turn_info = get_responses(
             args,
             draft_client, 

@@ -161,11 +161,12 @@ def is_multi_choice(answer):
     return True
 
 
-def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer_prm, prompts):
+def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer_prm, prompts, problems):
     outputs = [None] * len(prompts)  # Initialize with None for tracking
     token_counts = [(0, 0, 0) for _ in prompts]  # (client1_tokens, client2_tokens, discarded_client1_tokens) for each prompt
     turn_info = [[] for _ in prompts]  # List to store (turn_num, client_id) for each prompt
     current_prompts = [(i, p, []) for i, p in enumerate(prompts)] # (index, prompt, responses)
+    current_problems = problems
     num_turn = 0
     #prompts_len = [tokenizer1.encode(p) for _, p, _ in current_prompts]
     lens = [0 for _ in range(len(prompts))]
@@ -196,7 +197,7 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
                     for (_, _, prev_resp), new_resp in zip(current_prompts, responses1)]
         processed_data = [
             prepare_input(p, full_resp, tokenizer=tokenizer_prm, step_token=args.step_word) 
-            for (_, p, _), full_resp in zip(current_prompts, full_responses)
+            for p, full_resp in zip(current_problems, full_responses)
         ]
         input_ids, steps, reward_flags = zip(*processed_data)
         rewards = prm.embeddings.create(
@@ -244,6 +245,7 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
 
         # Process all responses
         next_prompts = []
+        next_problems = []
         for orig_idx, prompt, prev_responses, response, used_client1 in sorted(good_prompts, key=lambda x: x[0]):
             response_text = response.text + args.step_word
             client_id = 1 if used_client1 else 2
@@ -271,8 +273,11 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
             else:
                 next_prompts.append((orig_idx, prompt, full_responses))
                 lens[orig_idx] = len(tokenizer1.encode(prompt + full_responses_text))
+                next_problems.append(problems[orig_idx])
                 
         current_prompts = next_prompts
+        current_problems = next_problems
+        assert len(current_prompts) == len(current_problems)
         print(f"Turn {num_turn}: Complete {len(outputs) - len(current_prompts)} / {len(outputs)}")
         num_turn += 1
 
@@ -382,6 +387,8 @@ def main(client1, client2, prm, tokenizer1, tokenizer2, tokenizer_prm, data_name
 
         # get all outputs
         prompts = [item[1] for item in current_prompts]
+        problems = [sample["question"] for sample in samples]
+        assert len(prompts) == len(problems)
         outputs, token_counts, turn_info = get_responses(
             args,
             client1, 
@@ -390,7 +397,8 @@ def main(client1, client2, prm, tokenizer1, tokenizer2, tokenizer_prm, data_name
             tokenizer1, 
             tokenizer2,
             tokenizer_prm,
-            prompts, 
+            prompts,
+            problems,
         )
         assert len(outputs) == len(current_prompts)
 
