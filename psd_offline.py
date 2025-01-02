@@ -217,6 +217,7 @@ def get_responses(args, prm, draft_tokenizer, target_tokenizer, prm_tokenizer, p
         ]
         input_ids, steps, reward_flags = zip(*processed_data)
         print("Max length of inputs for PRM", max([len(input_id) for input_id in input_ids]))
+        input_ids = [input_id[-4096:] if len(input_ids)>=4096 else input_id for input_id in input_ids]
 
         rewards = prm.embeddings.create(
             input=input_ids,
