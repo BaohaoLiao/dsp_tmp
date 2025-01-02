@@ -162,7 +162,7 @@ def is_multi_choice(answer):
     return True
 
 
-def get_responses(args, draft_client, target_client, prm_client, draft_tokenizer, target_tokenizer, prm_tokenizer, prompts, questions): 
+def get_responses(args, draft_client, target_client, prm_client, draft_tokenizer, target_tokenizer, prm_tokenizer, prompts, problems): 
     outputs = [None] * len(prompts)  # Initialize with None for tracking
     token_counts = [(0, 0, 0) for _ in prompts]  # (client1_tokens, client2_tokens, discarded_client1_tokens) for each prompt
     turn_info = [[] for _ in prompts]  # List to store (turn_num, client_id) for each prompt
@@ -194,7 +194,7 @@ def get_responses(args, draft_client, target_client, prm_client, draft_tokenizer
             current_full_response = ''.join(r[0] for r in prev_responses) + draft_response.text
             processed_data = [
                 prepare_input(
-                    questions[orig_idx], current_full_response, tokenizer=prm_tokenizer, step_token=args.step_word
+                    problems[orig_idx], current_full_response, tokenizer=prm_tokenizer, step_token=args.step_word
                 )
             ]
             input_ids, steps, reward_flags = zip(*processed_data)
@@ -375,7 +375,7 @@ def main(draft_client, target_client, prm_client, draft_tokenizer, target_tokeni
 
         # get all outputs
         prompts = [item[1] for item in current_prompts]
-        questions = [sample["question"] for sample in samples]
+        problems = [sample["question"] for sample in samples]
         assert len(prompts) == len(questions)
         outputs, token_counts, turn_info = get_responses(
             args,
@@ -386,7 +386,7 @@ def main(draft_client, target_client, prm_client, draft_tokenizer, target_tokeni
             target_tokenizer,
             prm_tokenizer,
             prompts,
-            questions,
+            problems,
         )
         assert len(outputs) == len(current_prompts)
 
