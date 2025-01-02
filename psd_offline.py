@@ -174,6 +174,7 @@ def get_responses(args, prm, draft_tokenizer, target_tokenizer, prm_tokenizer, p
     current_prompts = [(i, p, []) for i, p in enumerate(prompts)] # (index, prompt, responses)
     num_turn = 0
     draft_llm = None
+    stop_words = ["</s>", "<|im_end|>", "<|endoftext|>", args.step_word]
    
     while current_prompts:
         prm_threshold = args.max_prm_threshold - (args.max_prm_threshold - args.min_prm_threshold) * num_turn / args.max_turns
@@ -195,7 +196,8 @@ def get_responses(args, prm, draft_tokenizer, target_tokenizer, prm_tokenizer, p
                     top_p=args.top_p,
                     max_tokens=args.max_tokens_per_call,
                     n=1,
-                    stop=[args.step_word],
+                    stop=stop_words,
+                    stop_token_ids=([151645, 151643] if "qwen2" in args.draft_name_or_path.lower() else None),
                 ),
                 use_tqdm=False,
             )
@@ -251,7 +253,8 @@ def get_responses(args, prm, draft_tokenizer, target_tokenizer, prm_tokenizer, p
                     top_p=args.top_p,
                     max_tokens=args.max_tokens_per_call,
                     n=1,
-                    stop=[args.step_word],
+                    stop=stop_words,
+                    stop_token_ids=([151645, 151643] if "qwen2" in args.target_name_or_path.lower() else None),
                 ),
                 use_tqdm=False,
             )
