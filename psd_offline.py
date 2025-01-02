@@ -205,6 +205,7 @@ def get_responses(args, prm, draft_tokenizer, target_tokenizer, prm_tokenizer, p
                 use_tqdm=False,
             )
         #draft_responses = [out.outputs[0] for out in draft_outputs]
+        print("??????", max([len(draft_output.outputs[0].token_ids) + len(draft_output.prompt_token_ids) for draft_output in draft_outputs]))
 
         # Evaluate responses from client1 with PRM
         full_responses = [''.join(r[0] for r in prev_resp) + draft_output.outputs[0].text 
