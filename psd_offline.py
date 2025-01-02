@@ -314,8 +314,6 @@ def get_responses(args, prm, draft_tokenizer, target_tokenizer, prm_tokenizer, p
         print(f"#### Step {num_turn}: Complete {len(outputs) - len(current_prompts)} / {len(outputs)}")
         num_turn += 1
 
-
-
     return outputs, token_counts, turn_info
 
 
