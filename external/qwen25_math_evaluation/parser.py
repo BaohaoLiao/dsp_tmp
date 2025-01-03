@@ -498,7 +498,7 @@ def extract_theoremqa_answer(pred: str, answer_flag: bool = True):
 
 def extract_answer(pred_str, data_name, use_last_number=True):
     pred_str = pred_str.replace("\u043a\u0438", "")
-    if data_name in ["mmlu_stem", "sat_math", "aqua", "gaokao2023"]:
+    if data_name in ["mmlu_stem", "sat_math", "aqua", "gaokao2023", "gpqa"]:
         # TODO check multiple choice
         return choice_answer_clean(pred_str)
 
@@ -547,7 +547,7 @@ def extract_answer(pred_str, data_name, use_last_number=True):
 
     # choice answer
     if (
-        data_name in ["sat_math", "aqua"]
+        data_name in ["sat_math", "aqua", "gpqa"]
         or "mmlu" in data_name
     ):
         tmp = re.findall(r"\b(A|B|C|D|E)\b", pred.upper())
@@ -609,7 +609,7 @@ def parse_ground_truth(example: Dict[str, Any], data_name):
                 gt_ans = float(gt_ans)
     elif data_name == "carp_en":
         gt_cot, gt_ans = example["steps"], example["answer"]
-    elif data_name == "mmlu_stem":
+    elif data_name == "mmlu_stem" or data_name == "gpqa":
         abcd = "ABCD"
         gt_cot, gt_ans = None, abcd[example["answer"]]
     elif data_name == "sat_math":
@@ -672,7 +672,7 @@ def parse_question(example, data_name):
             )
     elif data_name == "carp_en":
         question = example["content"]
-    elif data_name == "mmlu_stem":
+    elif data_name == "mmlu_stem" or data_name == "gpqa":
         options = example["choices"]
         assert len(options) == 4
         for i, (label, option) in enumerate(zip("ABCD", options)):

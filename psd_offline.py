@@ -317,7 +317,7 @@ def get_responses(args, prm, draft_tokenizer, target_tokenizer, prm_tokenizer, p
         else:
             num_unchanged += 1
  
-        print(f"#### Step {num_turn}: Complete {pre_num_finished} / {len(outputs)}, #unchanged {num_unchanged} / {args.patience}")
+        print(f"#### Step {num_turn}: Completed {pre_num_finished} / {len(outputs)}, #unchanged {num_unchanged} / {args.patience}")
         num_turn += 1
 
     return outputs, token_counts, turn_info

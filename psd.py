@@ -53,6 +53,7 @@ def parse_args():
         help="Apply chat template to prompt.",
     )
     parser.add_argument("--pipeline_parallel_size", type=int, default=1)
+    parser.add_argument("--patience", type=int, default=5)
     parser.add_argument(
         "--adapt_few_shot",
         action="store_true",
@@ -169,7 +170,9 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
     current_problems = problems
     num_turn = 0
     #prompts_len = [tokenizer1.encode(p) for _, p, _ in current_prompts]
-    lens = [0 for _ in range(len(prompts))]
+    #lens = [0 for _ in range(len(prompts))]
+    pre_num_finished = 0
+    num_unchanged = 0
    
     while current_prompts:
         prm_threshold = args.max_prm_threshold - (args.max_prm_threshold - args.min_prm_threshold) * num_turn / args.max_turns
@@ -272,16 +275,22 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
                 outputs[orig_idx] = full_responses_text[:-len(args.step_word)]
             else:
                 next_prompts.append((orig_idx, prompt, full_responses))
-                lens[orig_idx] = len(tokenizer1.encode(prompt + full_responses_text))
+                #lens[orig_idx] = len(tokenizer1.encode(prompt + full_responses_text))
                 next_problems.append(problems[orig_idx])
                 
         current_prompts = next_prompts
         current_problems = next_problems
         assert len(current_prompts) == len(current_problems)
-        print(f"Turn {num_turn}: Complete {len(outputs) - len(current_prompts)} / {len(outputs)}")
+        if len(outputs) - len(current_prompts) > pre_num_finished:
+            num_unchanged = 0
+            pre_num_finished = len(outputs) - len(current_prompts)
+        else:
+            num_unchanged += 1
+
+        print(f"#### Step {num_turn}: Completed {pre_num_finished} / {len(outputs)}, #unchanged {num_unchanged} / {args.patience}")
         num_turn += 1
 
-        print("max_len", max(lens))
+        #print("max_len", max(lens))
 
     return outputs, token_counts, turn_info
 
