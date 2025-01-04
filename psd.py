@@ -271,7 +271,8 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
             if (response.stop_reason is None) \
              or len(tokenizer1.encode(prompt + full_responses_text)) >= args.max_tokens_per_call \
              or len(tokenizer2.encode(prompt + full_responses_text)) >= args.max_tokens_per_call \
-             or num_turn >= args.max_turns - 1:
+             or num_turn >= args.max_turns - 1 \
+             or num_unchanged >= args.patience - 1:
                 outputs[orig_idx] = full_responses_text[:-len(args.step_word)]
             else:
                 next_prompts.append((orig_idx, prompt, full_responses))
