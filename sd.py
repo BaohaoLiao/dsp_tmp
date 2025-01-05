@@ -7,6 +7,7 @@ from tqdm import tqdm
 
 from vllm import LLM, SamplingParams
 from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
 
 from external.qwen25_math_evaluation.evaluate import evaluate
 from external.qwen25_math_evaluation.utils import set_seed, load_jsonl, save_jsonl, construct_prompt
@@ -53,6 +54,7 @@ def parse_args():
     parser.add_argument("--batch_size", default=1, type=int) 
     parser.add_argument("--max_num_seqs", default=64, type=int) 
     parser.add_argument("--speculative_draft_tensor_parallel_size", default=1, type=int)
+    parser.add_argument("--enable_log_stats", action="store_true", default=False)
     args = parser.parse_args()
     args.top_p = (
         1 if args.temperature == 0 else args.top_p
@@ -120,7 +122,7 @@ def setup(args):
             trust_remote_code=True,
             num_speculative_tokens=5,
             max_num_seqs=args.max_num_seqs,
-            #disable_log_stats=False,
+            disable_log_stats=not args.enable_log_stats,
         )
         tokenizer = None
         if args.apply_chat_template:
@@ -172,7 +174,6 @@ def is_multi_choice(answer):
     return True
 
 
-import torch
 @torch.no_grad()
 def generate_completions(models, tokenizers, prompts, batch_size=1, stop_id_sequences=None, add_special_tokens=True, disable_tqdm=False, **generation_kwargs):
     generations = []
@@ -354,6 +355,7 @@ def main(llm, tokenizer, data_name, args):
                     batch_size=args.batch_size,
                 )
             
+        time.sleep(10)
         assert len(outputs) == len(current_prompts)
 
         # process all outputs
