@@ -56,6 +56,7 @@ def parse_args():
     parser.add_argument("--speculative_draft_tensor_parallel_size", default=1, type=int)
     parser.add_argument("--enable_log_stats", action="store_true", default=False)
     parser.add_argument("--num_speculative_tokens", default=5, type=int)
+    args = parser.parse_args()
     args.top_p = (
         1 if args.temperature == 0 else args.top_p
     )  # top_p must be 1 when using greedy sampling (vllm)
