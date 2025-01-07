@@ -167,6 +167,7 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
     token_counts = [(0, 0, 0) for _ in prompts]  # (client1_tokens, client2_tokens, discarded_client1_tokens) for each prompt
     turn_info = [[] for _ in prompts]  # List to store (turn_num, client_id) for each prompt
     current_prompts = [(i, p, []) for i, p in enumerate(prompts)] # (index, prompt, responses)
+    all_rewards = [[] for _ in prompts]  # List to store (turn_num, client_id) for each prompt
     current_problems = problems
     num_turn = 0
     #prompts_len = [tokenizer1.encode(p) for _, p, _ in current_prompts]
@@ -217,6 +218,7 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
         good_prompts = []
         bad_prompts = []
         for (orig_idx, prompt, prev_responses), response1, step_reward in zip(current_prompts, responses1, step_rewards):
+            all_rewards[orig_idx].append(round(step_reward[-1], 3))
             if step_reward[-1] >= prm_threshold:
                 good_prompts.append((orig_idx, prompt, prev_responses, response1, True))  # True means use client1
             else:
@@ -293,7 +295,7 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
 
         #print("max_len", max(lens))
 
-    return outputs, token_counts, turn_info
+    return outputs, token_counts, turn_info, all_rewards
 
 
 def main(client1, client2, prm, tokenizer1, tokenizer2, tokenizer_prm, data_name, args):
@@ -399,7 +401,7 @@ def main(client1, client2, prm, tokenizer1, tokenizer2, tokenizer_prm, data_name
         prompts = [item[1] for item in current_prompts]
         problems = [sample["question"] for sample in samples]
         assert len(prompts) == len(problems)
-        outputs, token_counts, turn_info = get_responses(
+        outputs, token_counts, turn_info, all_rewards = get_responses(
             args,
             client1, 
             client2,
@@ -495,7 +497,7 @@ def main(client1, client2, prm, tokenizer1, tokenizer2, tokenizer_prm, data_name
         sample.pop("prompt")
         sample.update(
             {"code": code, "pred": preds, "report": reports, 
-             "token_counts": token_counts[i], "turn_info": turn_info[i]}
+             "token_counts": token_counts[i], "turn_info": turn_info[i], "reward": all_rewards[i]}
         )
         all_samples.append(sample)
 
