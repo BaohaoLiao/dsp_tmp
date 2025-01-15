@@ -146,7 +146,7 @@ PROMPT_TEMPLATES = {
         "\n\n",
     ),
     "qwen25-math-cot-en": (
-        "<|im_start|>system\nPlease reason step by step in English, and put your final answer within \\boxed{{}}.<|im_end|>\n"
+        "<|im_start|>system\nPlease reason step by step, and put your final answer within \\boxed{{}}. You must answer in English.<|im_end|>\n"
         "<|im_start|>user\n{input}<|im_end|>\n"
         "<|im_start|>assistant\n",
         "{output}",
