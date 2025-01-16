@@ -192,8 +192,8 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
         responses1 = sorted(responses1, key=lambda x: int(x.index))
         
         # record
-        for i, resp in enumerate(responses1):
-            draft_responses[i].append(resp.text)
+        for (orig_idx, _, _), response1 in zip(current_prompts, responses1):
+            draft_responses[orig_idx].append(response1.text)
 
         # Evaluate responses from client1 with PRM
         full_responses = [''.join(r[0] for r in prev_resp) + new_resp.text
