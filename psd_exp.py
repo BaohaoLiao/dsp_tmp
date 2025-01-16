@@ -511,7 +511,7 @@ def main(client1, client2, prm, tokenizer1, tokenizer2, tokenizer_prm, data_name
              "token_counts": token_counts[i], 
              "turn_info": turn_info[i], 
              "draft_reward": draft_rewards[i],
-             "target_reeward": target_rewards[i], 
+             "target_reward": target_rewards[i], 
              }
         )
         all_samples.append(sample)
