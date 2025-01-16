@@ -506,12 +506,12 @@ def main(client1, client2, prm, tokenizer1, tokenizer2, tokenizer_prm, data_name
             {"code": code, 
              "pred": preds, 
              "report": reports, 
+             "draft_response": draft_responses[i], 
+             "target_response": target_responses[i],
              "token_counts": token_counts[i], 
              "turn_info": turn_info[i], 
              "draft_reward": draft_rewards[i],
              "target_reeward": target_rewards[i], 
-             "draft_response": draft_responses[i], 
-             "target_response": target_responses[i],
              }
         )
         all_samples.append(sample)
