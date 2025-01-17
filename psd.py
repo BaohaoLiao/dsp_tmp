@@ -554,6 +554,8 @@ def main(client1, client2, prm, tokenizer1, tokenizer2, tokenizer_prm, data_name
     result_json["acceptance_rate"] = (
         (llm1_tokens[0] + llm1_tokens[1])/(llm1_tokens[0] + llm1_tokens[1] + llm1_discarded_tokens[0] + llm1_discarded_tokens[1])
     ) if ((llm1_tokens[0] + llm1_tokens[1]) > 0)  else (0,0) 
+    result_json["num_draft_tokens"] = sum(llm1_tokens) + sum(llm1_discarded_tokens)
+    result_json["num_target_tokens"] = sum(llm2_tokens)
 
     with open(
         out_file.replace(".jsonl", f"_{args.prompt_type}_metrics.json"), "w"
