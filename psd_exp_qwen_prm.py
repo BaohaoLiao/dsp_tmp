@@ -185,6 +185,7 @@ def prm_scores(prm, prm_tokenizer, current_prompts, responses, batch_size=16):
         p + "<extra_0>".join(r[0] for r in prev_resp) + "<extra_0>" + new_resp.text + "<extra_0>" 
         for (_, p, prev_resp), new_resp in zip(current_prompts, responses)
     ]
+    print(full_responses)
 
     # Process data in mini-batches
     all_rewards = []
