@@ -169,6 +169,13 @@ PROMPT_TEMPLATES = {
         "\n\n",
     ),
     "numina": ("### Problem: {input}\n### Solution:", " {output}", "\n\n"),
+    "llama3": (
+        "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n"
+        "Please reason step by step, and put your final answer within \\boxed{{}}.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
+        "{input}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
+        "{output}",
+        "\n\n",
+    )
 }
 
 
