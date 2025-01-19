@@ -231,7 +231,7 @@ def main(llm, tokenizer, data_name, args):
 
     max_func_call = 1 if args.prompt_type in ["cot", "pal"] else 4
 
-    if args.prompt_type == "qwen25":
+    if "qwen25" in args.prompt_type:
         stop_words = ["</s>", "<|im_end|>", "<|endoftext|>"]
     elif args.prompt_type == "llama3":
         stop_words = ["<|end_of_text|>", "<|eot_id|>"]
