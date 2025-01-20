@@ -219,7 +219,7 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
         ).choices
         responses2 = sorted(responses2, key=lambda x: int(x.index))
         # record
-        for (orig_idx, _, _), response1 in zip(current_prompts, responses2):
+        for (orig_idx, _, _), response2 in zip(current_prompts, responses2):
             target_responses[orig_idx].append(response2.text)
 
         # Evaluate responses from client1 with PRM
