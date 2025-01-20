@@ -175,7 +175,13 @@ PROMPT_TEMPLATES = {
         "{input}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
         "{output}",
         "\n\n",
-    )
+    ),
+    "deepseek-r1": (
+        "<｜begin▁of▁sentence｜><｜User｜>{input}\n"
+        "Please reason step by step, and put your final answer within \\boxed{{}}.<｜Assistant｜>",
+        "{output}",
+        "\n\n",
+    ),
 }
 
 

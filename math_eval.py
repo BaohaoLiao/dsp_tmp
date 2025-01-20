@@ -235,6 +235,9 @@ def main(llm, tokenizer, data_name, args):
         stop_words = ["</s>", "<|im_end|>", "<|endoftext|>"]
     elif args.prompt_type == "llama3":
         stop_words = ["<|end_of_text|>", "<|eot_id|>"]
+    elif args.prompt_type == "deepseek-r1":
+        stop_words = ["<｜end▁of▁sentence｜>"]
+
 
     if args.prompt_type in ["cot"]:
         stop_words.append("\n\nQuestion:")
