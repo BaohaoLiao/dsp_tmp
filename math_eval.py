@@ -267,6 +267,7 @@ def main(llm, tokenizer, data_name, args):
             break
 
         # get all outputs
+        """
         if args.n_sampling > 1:
             prompts = []
             for idx, item in enumerate(current_prompts):
@@ -274,6 +275,8 @@ def main(llm, tokenizer, data_name, args):
                     prompts.append(item[1])
         else:
             prompts = [item[1] for item in current_prompts]
+        """
+        prompts = [item[1] for item in current_prompts]
 
         if args.use_vllm:
             outputs = llm.generate(
@@ -282,13 +285,13 @@ def main(llm, tokenizer, data_name, args):
                     temperature=args.temperature,
                     top_p=args.top_p,
                     max_tokens=args.max_tokens_per_call,
-                    n=args.n_sampling,
+                    n=1, #args.n_sampling,
                     stop=stop_words,
                     stop_token_ids=stop_token_ids,
                     seed=args.seed,
                 ),
             )
-            
+
             outputs = sorted(
                 outputs, key=lambda x: int(x.request_id)
             )  # sort outputs by request_id
@@ -303,7 +306,6 @@ def main(llm, tokenizer, data_name, args):
                 stop_id_sequences=stop_words,
             )
 
-        print(outputs)
         #print(len(outputs), len(current_prompts))
         assert len(outputs) == len(current_prompts)
 
