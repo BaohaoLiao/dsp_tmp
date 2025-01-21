@@ -267,7 +267,14 @@ def main(llm, tokenizer, data_name, args):
             break
 
         # get all outputs
-        prompts = [item[1] for item in current_prompts]
+        if args.n_sampling > 1:
+            prompts = []
+            for idx, item in enumerate(current_prompts):
+                if idx % args.n_sampling == 0:
+                    prompts.append(item[1])
+        else:
+            prompts = [item[1] for item in current_prompts]
+
         if args.use_vllm:
             outputs = llm.generate(
                 prompts,
@@ -275,7 +282,7 @@ def main(llm, tokenizer, data_name, args):
                     temperature=args.temperature,
                     top_p=args.top_p,
                     max_tokens=args.max_tokens_per_call,
-                    n=1,
+                    n=args.n_sampling,
                     stop=stop_words,
                     stop_token_ids=stop_token_ids,
                     seed=args.seed,
