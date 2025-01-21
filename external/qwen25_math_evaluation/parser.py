@@ -630,6 +630,7 @@ def parse_ground_truth(example: Dict[str, Any], data_name):
     elif data_name in [
         "aime24",
         "amc23",
+        "aimo2",
         "cmath",
         "gaokao2024_I",
         "gaokao2024_II",
