@@ -236,9 +236,14 @@ def main(llm, tokenizer, data_name, args):
     elif args.prompt_type == "llama3":
         stop_words = ["<|end_of_text|>", "<|eot_id|>"]
     elif args.prompt_type == "deepseek-r1":
-        stop_words = ["<｜end▁of▁sentence｜>"]
+        stop_words = ["<｜end▁of▁sentence｜>", "<｜User｜>"]
 
-
+    stop_token_ids = None
+    if "qwen2" in args.model_name_or_path.lower():
+        stop_token_ids=[151645, 151643]
+    elif "deepseek" in args.model_name_or_path.lower():
+        stop_token_ids=[151643, 151644]
+                        
     if args.prompt_type in ["cot"]:
         stop_words.append("\n\nQuestion:")
     if args.prompt_type in ["pal", "tool-integrated", "jiuzhang_tora"]:
@@ -272,11 +277,7 @@ def main(llm, tokenizer, data_name, args):
                     max_tokens=args.max_tokens_per_call,
                     n=1,
                     stop=stop_words,
-                    stop_token_ids=(
-                        [151645, 151643]
-                        if "qwen2" in args.model_name_or_path.lower()
-                        else None
-                    ),
+                    stop_token_ids=stop_token_ids,
                 ),
             )
 
