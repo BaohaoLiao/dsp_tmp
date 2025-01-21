@@ -239,8 +239,8 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
         # Split prompts based on step_reward
         good_prompts = []
         for (orig_idx, prompt, prev_responses), response1, response2, draft_step_reward, target_step_reward in zip(current_prompts, responses1, responses2, draft_step_rewards, target_step_rewards):
-            draft_rewards[orig_idx].append(round(draft_step_reward[-1], 6))
-            target_rewards[orig_idx].append(round(target_step_reward[-1], 6))
+            draft_rewards[orig_idx].append(round(draft_step_reward[-1], 10))
+            target_rewards[orig_idx].append(round(target_step_reward[-1], 10))
             if draft_step_reward[-1] < prm_threshold:
                 good_prompts.append((orig_idx, prompt, prev_responses, response2, True))
             else:
