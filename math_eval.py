@@ -289,6 +289,7 @@ def main(llm, tokenizer, data_name, args):
                 ),
             )
 
+            print(outputs)
             outputs = sorted(
                 outputs, key=lambda x: int(x.request_id)
             )  # sort outputs by request_id
@@ -303,7 +304,7 @@ def main(llm, tokenizer, data_name, args):
                 stop_id_sequences=stop_words,
             )
 
-        print(len(outputs), len(current_prompts))
+        #print(len(outputs), len(current_prompts))
         assert len(outputs) == len(current_prompts)
 
         # process all outputs
