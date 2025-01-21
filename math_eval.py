@@ -278,6 +278,7 @@ def main(llm, tokenizer, data_name, args):
                     n=1,
                     stop=stop_words,
                     stop_token_ids=stop_token_ids,
+                    seed=args.seed,
                 ),
             )
 
