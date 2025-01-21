@@ -235,7 +235,7 @@ def main(llm, tokenizer, data_name, args):
         stop_words = ["</s>", "<|im_end|>", "<|endoftext|>"]
     elif args.prompt_type == "llama3":
         stop_words = ["<|end_of_text|>", "<|eot_id|>"]
-    elif args.prompt_type == "deepseek-r1":
+    elif "deepseek" in args.prompt_type:
         stop_words = ["<｜end▁of▁sentence｜>", "<｜User｜>"]
 
     stop_token_ids = None
