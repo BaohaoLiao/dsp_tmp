@@ -304,6 +304,7 @@ def main(llm, tokenizer, data_name, args):
                 stop_id_sequences=stop_words,
             )
 
+        print(outputs)
         #print(len(outputs), len(current_prompts))
         assert len(outputs) == len(current_prompts)
 
