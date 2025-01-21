@@ -288,8 +288,7 @@ def main(llm, tokenizer, data_name, args):
                     seed=args.seed,
                 ),
             )
-
-            print(outputs)
+            
             outputs = sorted(
                 outputs, key=lambda x: int(x.request_id)
             )  # sort outputs by request_id
