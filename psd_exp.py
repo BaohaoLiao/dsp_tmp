@@ -215,7 +215,7 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
         bad_prompts = []
         for (orig_idx, prompt, prev_responses), response1, step_reward in zip(current_prompts, responses1, step_rewards):
             draft_rewards[orig_idx].append(round(step_reward[-1], 6))
-            if step_reward[-1] >= prm_threshold:
+            if step_reward[-1] >= prm_threshold or step_reward[-1] < args.cutoff_threshold:
                 good_prompts.append((orig_idx, prompt, prev_responses, response1, True))  # True means use client1
             else:
                 response1_text = response1.text + args.step_word
@@ -572,6 +572,9 @@ def main(client1, client2, prm, tokenizer1, tokenizer2, tokenizer_prm, data_name
     result_json["acceptance_rate"] = (
         (llm1_tokens[0] + llm1_tokens[1])/(llm1_tokens[0] + llm1_tokens[1] + llm1_discarded_tokens[0] + llm1_discarded_tokens[1])
     ) if ((llm1_tokens[0] + llm1_tokens[1]) > 0)  else (0,0) 
+    result_json["num_draft_tokens"] = sum(llm1_tokens) + sum(llm1_discarded_tokens)
+    result_json["num_target_tokens"] = sum(llm2_tokens)
+
 
     with open(
         out_file.replace(".jsonl", f"_{args.prompt_type}_metrics.json"), "w"
