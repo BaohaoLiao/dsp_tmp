@@ -92,7 +92,7 @@ def prepare_data(data_name, args):
     output_dir = args.output_dir
     if not os.path.exists(output_dir):
         output_dir = f"outputs/{output_dir}"
-    out_file = f"{output_dir}/{data_name}/{out_file_prefix}_s{args.start}_e{args.end}_maxprm{args.max_prm_threshold}_minprm{args.min_prm_threshold}_maxturns{args.max_turns}.jsonl"
+    out_file = f"{output_dir}/{data_name}/{out_file_prefix}_s{args.start}_e{args.end}_maxprm{args.max_prm_threshold}_minprm{args.min_prm_threshold}_maxturns{args.max_turns}_cutoff{args.target_cutoff_threshold}_{args.draft_cutoff_threshold}.jsonl"
     os.makedirs(f"{output_dir}/{data_name}", exist_ok=True)
 
     # load all processed samples
