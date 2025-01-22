@@ -46,7 +46,8 @@ def parse_args():
     parser.add_argument("--step_word", type=str, default="\n\n")
     parser.add_argument("--max_prm_threshold", type=float, default=0.5)
     parser.add_argument("--min_prm_threshold", type=float, default=None)
-    parser.add_argument("--cutoff_threshold", type=float, default=0.1)
+    parser.add_argument("--target_cutoff_threshold", type=float, default=0.1)
+    parser.add_argument("--draft_cutoff_threshold", type=float, default=0.8)
     parser.add_argument("--max_turns", type=int, default=30)
     parser.add_argument(
         "--apply_chat_template",
@@ -215,7 +216,7 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
         bad_prompts = []
         for (orig_idx, prompt, prev_responses), response1, step_reward in zip(current_prompts, responses1, step_rewards):
             draft_rewards[orig_idx].append(round(step_reward[-1], 6))
-            if step_reward[-1] >= prm_threshold or step_reward[-1] < args.cutoff_threshold:
+            if step_reward[-1] >= prm_threshold or step_reward[-1] < args.draft_cutoff_threshold:
                 good_prompts.append((orig_idx, prompt, prev_responses, response1, True))  # True means use client1
             else:
                 response1_text = response1.text + args.step_word
@@ -287,7 +288,7 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
              or num_turn >= args.max_turns - 1 \
              or num_unchanged >= args.patience - 1:
                 outputs[orig_idx] = full_responses_text[:-len(args.step_word)]
-            elif target_rewards[orig_idx] and target_rewards[orig_idx][-1] < args.cutoff_threshold:
+            elif target_rewards[orig_idx] and target_rewards[orig_idx][-1] < args.target_cutoff_threshold:
                 outputs[orig_idx] = full_responses_text[:-len(args.step_word)]
             else:
                 next_prompts.append((orig_idx, prompt, full_responses))
