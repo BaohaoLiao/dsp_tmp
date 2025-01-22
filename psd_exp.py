@@ -46,6 +46,7 @@ def parse_args():
     parser.add_argument("--step_word", type=str, default="\n\n")
     parser.add_argument("--max_prm_threshold", type=float, default=0.5)
     parser.add_argument("--min_prm_threshold", type=float, default=None)
+    parser.add_argument("--cutoff_threshold", type=float, default=0.1)
     parser.add_argument("--max_turns", type=int, default=30)
     parser.add_argument(
         "--apply_chat_template",
@@ -213,7 +214,7 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
         good_prompts = []
         bad_prompts = []
         for (orig_idx, prompt, prev_responses), response1, step_reward in zip(current_prompts, responses1, step_rewards):
-            draft_rewards[orig_idx].append(round(step_reward[-1], 3))
+            draft_rewards[orig_idx].append(round(step_reward[-1], 6))
             if step_reward[-1] >= prm_threshold:
                 good_prompts.append((orig_idx, prompt, prev_responses, response1, True))  # True means use client1
             else:
@@ -256,7 +257,7 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
             step_rewards = derive_step_rewards_vllm(rewards, reward_flags) # list[list]
 
             for i, (orig_idx, _, _) in enumerate(bad_prompts):
-                target_rewards[orig_idx].append(round(step_rewards[i][-1], 3))
+                target_rewards[orig_idx].append(round(step_rewards[i][-1], 6))
 
         # Process all responses
         next_prompts = []
@@ -285,6 +286,8 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
              or len(tokenizer2.encode(prompt + full_responses_text)) >= args.max_tokens_per_call \
              or num_turn >= args.max_turns - 1 \
              or num_unchanged >= args.patience - 1:
+                outputs[orig_idx] = full_responses_text[:-len(args.step_word)]
+            elif target_rewards[orig_idx] and target_rewards[orig_idx][-1] < args.cutoff_threshold:
                 outputs[orig_idx] = full_responses_text[:-len(args.step_word)]
             else:
                 next_prompts.append((orig_idx, prompt, full_responses))
