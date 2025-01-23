@@ -43,7 +43,7 @@ def parse_args():
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--use_safetensors", action="store_true")
     parser.add_argument("--num_shots", type=int, default=0)
-    parser.add_argument("--step_word", type=str, default="\n\n")
+    parser.add_argument("--step_word", type=str, default="\n")
     parser.add_argument("--max_prm_threshold", type=float, default=0.5)
     parser.add_argument("--min_prm_threshold", type=float, default=None)
     parser.add_argument("--target_cutoff_threshold", type=float, default=0.1)
