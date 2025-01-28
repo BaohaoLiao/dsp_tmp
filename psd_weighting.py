@@ -238,12 +238,14 @@ def get_responses(args, client1, client2, prm, tokenizer1, tokenizer2, tokenizer
                 else:
                     response1_text = response1.text + args.step_word
                     token_counts[orig_idx] = (token_counts[orig_idx][0], token_counts[orig_idx][1], token_counts[orig_idx][2]+len(tokenizer1.encode(response1_text)))
+                    bad_prompts.append((orig_idx, prompt, prev_responses))
             elif args.weight_version == "v4": # w(r) = 1/(1+e^{-alpha * (r-delta)})
                 if 1 / (1 + math.exp(prm_threshold-step_reward[-1]))  >= random.random():
                     good_prompts.append((orig_idx, prompt, prev_responses, response1, True))  # True means use client1
                 else:
                     response1_text = response1.text + args.step_word
                     token_counts[orig_idx] = (token_counts[orig_idx][0], token_counts[orig_idx][1], token_counts[orig_idx][2]+len(tokenizer1.encode(response1_text)))
+                    bad_prompts.append((orig_idx, prompt, prev_responses))
                 
 
         # Generate responses using client2 for bad prompts
