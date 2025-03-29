@@ -140,7 +140,6 @@ def setup(args):
         gpu_memory_utilization=0.95,
         seed=args.seed,
         task="reward",
-        max_num_seqs=args.max_num_seqs,
     )
     tokenizer_prm = prm.get_tokenizer()
 
