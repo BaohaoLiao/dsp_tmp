@@ -179,7 +179,7 @@ def prm_scores(prm, prm_tokenizer, current_prompts, responses):
     rewards = sorted(rewards, key=lambda x: int(x.request_id))
     all_rewards = []
     for reward in rewards:
-        all_rewards.append(list(F.softmax(reward.outputs.data, dim=-1)[:, 1].numpy()))
+        all_rewards.append([float(a) for a in list(F.softmax(reward.outputs.data, dim=-1)[:, 1].numpy())])
     return all_rewards
     
 
