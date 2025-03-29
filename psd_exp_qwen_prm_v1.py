@@ -134,7 +134,7 @@ def setup(args):
 
     available_gpus = os.environ["CUDA_VISIBLE_DEVICES"].split(",")
     prm =  LLM(
-        model=args.model_name_or_path, 
+        model=args.prm_name_or_path, 
         trust_remote_code=True,      
         tensor_parallel_size=len(available_gpus),
         gpu_memory_utilization=0.95,
