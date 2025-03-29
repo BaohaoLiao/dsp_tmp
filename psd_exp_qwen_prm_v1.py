@@ -180,6 +180,7 @@ def prm_scores(prm, prm_tokenizer, current_prompts, responses):
     all_rewards = []
     for reward in rewards:
         all_rewards.append([float(a) for a in list(F.softmax(reward.outputs.data, dim=-1)[:, 1].numpy())])
+    print(all_rewards)
     return all_rewards
     
 
