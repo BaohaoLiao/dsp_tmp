@@ -104,7 +104,7 @@ def setup(args):
 
 def get_responses(args, client, tokenizer, prompts):
     responses = client.completions.create(
-            model=args.llm1_name_or_path.split("/")[-1],
+            model=args.llm_name_or_path.split("/")[-1],
             prompt=prompts,
             temperature=args.temperature,
             top_p=args.top_p,
