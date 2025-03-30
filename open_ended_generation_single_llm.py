@@ -120,7 +120,7 @@ def main(client, tokenizer, data_name, args):
     print("=" * 50)
     print("data:", data_name, " ,remain samples:", len(samples))
     if len(samples) > 0:
-        print(samples[0])
+        print(samples[0]["prompt"])
 
     # start inference
     start_time = time.time()
