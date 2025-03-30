@@ -136,6 +136,7 @@ def main(client, tokenizer, data_name, args):
         all_samples.append(sample)
 
     # Save to a file
+    print(f"Save output to {out_file}")
     with open(out_file, 'w', encoding='utf-8') as f:
         json.dump(all_samples, f, ensure_ascii=False, indent=2)
     
