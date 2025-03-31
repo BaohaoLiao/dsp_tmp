@@ -131,7 +131,7 @@ def prm_scores(prm, prm_tokenizer, current_prompts, responses):
     ]
     all_rewards = []
     for tok_full_response in tok_full_responses:
-        all_rewards.append(float(prm(tok_full_response).logits[0][0].item()))
+        all_rewards.append([float(prm(tok_full_response).logits[0][0].item())])
     return all_rewards
 
 
