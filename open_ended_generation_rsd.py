@@ -153,7 +153,7 @@ def get_responses(args, draft_client, draft_tokenizer, target_client, target_tok
         batch_prompts = [p + args.step_word.join(r[0] for r in responses) + args.step_word for _, p, responses in current_prompts]
 
         responses1 = draft_client.completions.create(
-            model=args.llm1_name_or_path.split("/")[-1],
+            model=args.draft_name_or_path.split("/")[-1],
             prompt=batch_prompts,
             temperature=args.temperature,
             top_p=args.top_p,
@@ -186,7 +186,7 @@ def get_responses(args, draft_client, draft_tokenizer, target_client, target_tok
         if bad_prompts:
             batch_prompts = [p + args.step_word.join(r[0] for r in responses) + args.step_word for _, p, responses in bad_prompts]
             responses2 = target_client.completions.create(
-                model=args.llm2_name_or_path.split("/")[-1],
+                model=args.target_name_or_path.split("/")[-1],
                 prompt=batch_prompts,
                 temperature=args.temperature,
                 top_p=args.top_p,
