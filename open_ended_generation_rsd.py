@@ -269,7 +269,7 @@ def main(draft_client, draft_tokenizer, target_client, target_tokenizer, rm, rm_
     for i, (sample, output) in enumerate(zip(samples, outputs)):
         sample.pop("prompt")
         sample["output"] = output
-        sample["generator"] = args.llm_name_or_path.split("/")[-1]
+        sample["generator"] = args.rm_name_or_path.split("/")[-1]
         sample.update(
             { 
              "draft_response": draft_responses[i], 
