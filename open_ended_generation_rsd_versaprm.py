@@ -128,19 +128,18 @@ def setup(args):
 def prm_scores(prm, prm_tokenizer, current_prompts, current_problems, responses):
     if len(current_prompts[0][2]) > 0:
         full_responses = [
-            p + "\n\n" + "\n\n\n\n".join(r[0] for r in prev_resp) + "\n\n\n\n" + new_resp.text + "\n\n\n\n"
+            p + "\n\n" + " \n\n\n\n".join(r[0] for r in prev_resp) + " \n\n\n\n" + new_resp.text + " \n\n\n\n"
             for p, (_, _, prev_resp), new_resp in zip(current_problems, current_prompts, responses)
         ]
     else:
         full_responses = [
-            p + "\n\n" + new_resp.text + "\n\n\n\n"
+            p + "\n\n" + new_resp.text + " \n\n\n\n"
             for p, (_, _, prev_resp), new_resp in zip(current_problems, current_prompts, responses)
         ]
     tok_full_responses = [
         torch.tensor([prm_tokenizer.encode(full_response)]).to("cuda:0") for full_response in full_responses
     ]
 
-    print(full_responses)
     candidate_tokens = [12, 10]
     all_rewards = []
     for tok_full_response in tok_full_responses:
@@ -149,7 +148,6 @@ def prm_scores(prm, prm_tokenizer, current_prompts, current_problems, responses)
         step_scores = scores[tok_full_response == 23535]
         step_probs = step_scores.tolist()
         all_rewards.append(step_probs)
-    print(all_rewards)
     return all_rewards
 
 
