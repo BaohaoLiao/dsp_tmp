@@ -288,43 +288,24 @@ def main(draft_client, draft_tokenizer, target_client, target_tokenizer, rm, rm_
         json.dump(all_samples, f, ensure_ascii=False, indent=2)
 
 
-    llm1_tokens = [0, 0] # (correct, wrong)
-    llm1_discarded_tokens = [0, 0]
-    llm2_tokens = [0, 0]
+    llm1_tokens = 0
+    llm1_discarded_tokens = 0
+    llm2_tokens = 0
     for i, sample in enumerate(all_samples):
-        if sample["score"][0]:
-            llm1_tokens[0] += sample["token_counts"][0]
-            llm2_tokens[0] += sample["token_counts"][1]
-            llm1_discarded_tokens[0] += sample["token_counts"][2]
-        else:
-            llm1_tokens[1] += sample["token_counts"][0]
-            llm2_tokens[1] += sample["token_counts"][1]
-            llm1_discarded_tokens[1] += sample["token_counts"][2]
-    total_tokens = sum(llm1_tokens) + sum(llm2_tokens) + sum(llm1_discarded_tokens)
-    total_tokens_for_correct_pred = llm1_discarded_tokens[0] + llm1_tokens[0] + llm2_tokens[0]
-    total_tokens_for_wrong_pred = llm1_discarded_tokens[1] + llm1_tokens[1] + llm2_tokens[1]
+        llm1_tokens += sample["token_counts"][0]
+        llm2_tokens += sample["token_counts"][1]
+        llm1_discarded_tokens += sample["token_counts"][2]
+    total_tokens = llm1_tokens + llm2_tokens + llm1_discarded_tokens
 
     result_json = {}
     result_json["tokens_ratio_overall(llm1,llm2)"] = (
-        (sum(llm1_tokens)+sum(llm1_discarded_tokens))/total_tokens, sum(llm2_tokens)/total_tokens
+        (llm1_tokens + llm1_discarded_tokens)/total_tokens, llm2_tokens/total_tokens
     ) if total_tokens > 0 else (0,0) 
-    result_json["tokens_ratio_correct_prediction(llm1,llm2)"] = (
-        (llm1_discarded_tokens[0]+llm1_tokens[0])/total_tokens_for_correct_pred, llm2_tokens[0]/total_tokens_for_correct_pred
-    ) if total_tokens_for_correct_pred > 0 else (0,0) 
-    result_json["tokens_ratio_wrong_prediction(llm1,llm2)"] = (
-        (llm1_discarded_tokens[1]+llm1_tokens[1])/total_tokens_for_wrong_pred, llm2_tokens[1]/total_tokens_for_wrong_pred
-    ) if total_tokens_for_wrong_pred > 0 else (0,0) 
-    result_json["tokens_ratio(correct,wrong)"] = (
-        total_tokens_for_correct_pred/total_tokens, total_tokens_for_wrong_pred/total_tokens
-    ) if total_tokens > 0 else (0,0) 
-    result_json["tokens_ratio_discarded(correct,wrong)"] = (
-        llm1_discarded_tokens[0]/total_tokens_for_correct_pred, llm1_discarded_tokens[1]/total_tokens_for_wrong_pred
-    ) if (total_tokens_for_correct_pred > 0 and total_tokens_for_wrong_pred > 0)  else (0,0) 
     result_json["acceptance_rate"] = (
-        (llm1_tokens[0] + llm1_tokens[1])/(llm1_tokens[0] + llm1_tokens[1] + llm1_discarded_tokens[0] + llm1_discarded_tokens[1])
-    ) if ((llm1_tokens[0] + llm1_tokens[1]) > 0)  else (0,0) 
-    result_json["num_draft_tokens"] = sum(llm1_tokens) + sum(llm1_discarded_tokens)
-    result_json["num_target_tokens"] = sum(llm2_tokens)
+        (llm1_tokens)/(llm1_tokens + llm1_discarded_tokens)
+    ) if (llm1_tokens > 0)  else (0) 
+    result_json["num_draft_tokens"] = llm1_tokens + llm1_discarded_tokens
+    result_json["num_target_tokens"] = llm2_tokens
 
     with open(
         out_file.replace(".json", f"_{args.prompt_type}_metrics.json"), "w"
