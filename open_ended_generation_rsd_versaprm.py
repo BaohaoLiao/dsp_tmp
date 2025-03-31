@@ -140,6 +140,7 @@ def prm_scores(prm, prm_tokenizer, current_prompts, current_problems, responses)
         torch.tensor([prm_tokenizer.encode(full_response)]).to("cuda:0") for full_response in full_responses
     ]
 
+    print(full_responses)
     candidate_tokens = [12, 10]
     all_rewards = []
     for tok_full_response in tok_full_responses:
