@@ -149,7 +149,7 @@ def prm_scores(prm, prm_tokenizer, current_prompts, current_problems, responses)
         step_probs = step_scores.tolist()
         all_rewards.append(step_probs)
         if len(step_probs) == 0:
-            print(full_response)
+            print([full_response])
     print(all_rewards)
     return all_rewards
 
