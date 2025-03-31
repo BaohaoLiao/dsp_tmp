@@ -148,6 +148,7 @@ def prm_scores(prm, prm_tokenizer, current_prompts, current_problems, responses)
         step_scores = scores[tok_full_response == 23535]
         step_probs = step_scores.tolist()
         all_rewards.append(step_probs)
+    print(all_rewards)
     return all_rewards
 
 
