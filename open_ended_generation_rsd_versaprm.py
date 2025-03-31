@@ -126,7 +126,7 @@ def setup(args):
 
 @torch.no_grad()
 def prm_scores(prm, prm_tokenizer, current_prompts, current_problems, responses):
-    if len(current_prompts[0][-2]) > 0:
+    if len(current_prompts[0][2]) > 0:
         full_responses = [
             p + "\n\n" + "\n\n\n\n".join(r[0] for r in prev_resp) + "\n\n\n\n" + new_resp.text + "\n\n\n\n"
             for p, (_, _, prev_resp), new_resp in zip(current_problems, current_prompts, responses)
