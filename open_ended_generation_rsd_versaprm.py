@@ -150,7 +150,8 @@ def prm_scores(prm, prm_tokenizer, current_prompts, current_problems, responses)
         all_rewards.append(step_probs)
         if len(step_probs) == 0:
             print([full_response])
-    print(all_rewards)
+            print(step_probs)
+            print(tok_full_response)
     return all_rewards
 
 
