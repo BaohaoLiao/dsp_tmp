@@ -142,12 +142,14 @@ def prm_scores(prm, prm_tokenizer, current_prompts, current_problems, responses)
 
     candidate_tokens = [12, 10]
     all_rewards = []
-    for tok_full_response in tok_full_responses:
+    for full_response, tok_full_response in zip(full_responses, tok_full_responses):
         logits = prm(tok_full_response).logits[:,:,candidate_tokens]
         scores = logits.softmax(dim=-1)[:,:,1] 
         step_scores = scores[tok_full_response == 23535]
         step_probs = step_scores.tolist()
         all_rewards.append(step_probs)
+        if len(step_probs) == 0:
+            print(full_response)
     print(all_rewards)
     return all_rewards
 
