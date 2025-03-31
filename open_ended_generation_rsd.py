@@ -240,8 +240,6 @@ def get_responses(args, draft_client, draft_tokenizer, target_client, target_tok
                 next_prompts.append((orig_idx, prompt, full_responses))
                 
         current_prompts = next_prompts
-        current_problems = next_problems
-        assert len(current_prompts) == len(current_problems)
         if len(outputs) - len(current_prompts) > pre_num_finished:
             num_unchanged = 0
             pre_num_finished = len(outputs) - len(current_prompts)
